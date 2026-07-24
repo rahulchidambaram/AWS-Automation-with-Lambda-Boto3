@@ -8,19 +8,23 @@ Build an automated alert when AWS spend exceeds a threshold, using the Cost Expl
 
 ### 1. Setup
 
-8. SNS → Topics → Create topic → Type: Standard, Name: **aws-cost-alerts**, Create topic.
-9. Open the topic → Create subscription → Protocol: Email → Endpoint: your email → Create subscription.
-10. Check your inbox and click Confirm subscription.
-11. Copy the Topic ARN — needed in the code below.
-12. **COST WARNING:** each `ce:GetCostAndUsage` call costs roughly $0.01 (~Rs.1). Plan to invoke this manually only a handful of times.
+- SNS → Topics → Create topic → Type: Standard, Name: **aws-cost-alerts**, Create topic.
+- Open the topic → Create subscription → Protocol: Email → Endpoint: your email → Create subscription.
+- Check your inbox and click Confirm subscription.
+- Copy the Topic ARN — needed in the code below.
+- **COST WARNING:** each `ce:GetCostAndUsage` call costs roughly $0.01 (~Rs.1). Plan to invoke this manually only a handful of times.
 
-![SNS topic creation](screenshots/01-sns-topic-create.png)
-![SNS subscription confirmation](screenshots/02-sns-subscription-confirm.png)
+
+
+<img width="975" height="367" alt="image" src="https://github.com/user-attachments/assets/309e5d6e-2766-427b-a44d-8bb4cb823661" />
+
+<img width="975" height="444" alt="image" src="https://github.com/user-attachments/assets/fb9263c8-51b9-466f-a41a-e07c9b50acff" />
+
 
 ### 2. Create the IAM Role
 
-13. IAM → Roles → Create role → AWS service → Lambda → name **cost-alert-lambda-role**
-14. Add inline policy → JSON → paste the policy below, replacing the SNS ARN placeholder with your real topic ARN → name it **CostAlertPolicy** → Create Role
+- IAM → Roles → Create role → AWS service → Lambda → name **cost-alert-lambda-role**
+- Add inline policy → JSON → paste the policy below, replacing the SNS ARN placeholder with your real topic ARN → name it **CostAlertPolicy** → Create Role
 
 **Inline policy JSON used:**
 
@@ -54,14 +58,16 @@ Build an automated alert when AWS spend exceeds a threshold, using the Cost Expl
 }
 ```
 
-![IAM role inline policy](screenshots/03-iam-role-inline-policy.png)
+
+<img width="975" height="402" alt="image" src="https://github.com/user-attachments/assets/c6f82297-5d16-4415-a9ff-df98435ab757" />
+
 
 ### 3. Create the Lambda Function
 
-15. Lambda → Create function → **Daily-cost-alert**, Python 3.14, existing role → **cost-alert-lambda-role** → Create function
-16. Paste the code below, update `SNS_TOPIC_ARN` to your real ARN.
-17. Confirm `THRESHOLD_USD = 0.01` is active (testing mode, guaranteed to trigger an alert), Deploy.
-18. Configuration → General → Timeout: 30 seconds, Save.
+- Lambda → Create function → **Daily-cost-alert**, Python 3.14, existing role → **cost-alert-lambda-role** → Create function
+- Paste the code below, update `SNS_TOPIC_ARN` to your real ARN.
+- Confirm `THRESHOLD_USD = 0.01` is active (testing mode, guaranteed to trigger an alert), Deploy.
+- Configuration → General → Timeout: 30 seconds, Save.
 
 **Full function code (`lambda_function.py`):**
 
@@ -149,36 +155,48 @@ def lambda_handler(event, context):
     }
 ```
 
-![Lambda function code pasted](screenshots/04-lambda-function-code.png)
+
+<img width="975" height="381" alt="image" src="https://github.com/user-attachments/assets/c5ea4bdc-0281-4d4f-b5f2-ab121cd42884" />
+
 
 ### 4. Test It
 
-1. Lambda → Test → Create new event → Event name: `ManualCostAlertTest` → invoke with empty `{}` test event, once → Save & Test
-2. Check CloudWatch Logs for the printed month-to-date **UnblendedCost** value.
-3. Check your email for the SNS cost alert (expected, since the $0.01 test threshold is essentially always exceeded).
-4. Avoid re-testing more than 2-3 times total to keep API charges minimal
+- Lambda → Test → Create new event → Event name: `ManualCostAlertTest` → invoke with empty `{}` test event, once → Save & Test
+- Check CloudWatch Logs for the printed month-to-date **UnblendedCost** value.
+- Check your email for the SNS cost alert (expected, since the $0.01 test threshold is essentially always exceeded).
+- Avoid re-testing more than 2-3 times total to keep API charges minimal
 
-![Test — CloudWatch logs](screenshots/05-test-cloudwatch-logs.png)
-![Test — SNS email alert](screenshots/06-test-sns-email-alert.png)
+
+<img width="975" height="379" alt="image" src="https://github.com/user-attachments/assets/c02327f7-a23f-453e-bade-fcda0fdff19e" />
+
+
+<img width="975" height="248" alt="image" src="https://github.com/user-attachments/assets/5d1f3c9a-f34a-4111-87e6-5abb6128227e" />
+
 
 ### 5. Create EventBridge Scheduler
 
-5. EventBridge → Scheduler → Create Schedule → name **Daily_Cost_Alert** → Enter Description → Schedule Pattern: Recurring
-   a. Minutes — 0
-   b. Hours — 10
-   c. Day of Month, Month, Year — *
-   d. Day of week — ?
-6. Next → Target: Lambda function → Choose created lambda function: **daily-cost-alert** → Next → Create rule.
-7. Only attach this schedule once you're fully done testing, since it will trigger a billed API call every day.
+- EventBridge → Scheduler → Create Schedule → name **Daily_Cost_Alert** → Enter Description → Schedule Pattern: Recurring
+   - Minutes — 0
+   - Hours — 10
+   - Day of Month, Month, Year — *
+   - Day of week — ?
+- Next → Target: Lambda function → Choose created lambda function: **daily-cost-alert** → Next → Create rule.
+- Only attach this schedule once you're fully done testing, since it will trigger a billed API call every day.
 
-![EventBridge scheduler creation](screenshots/07-eventbridge-scheduler-create.png)
-![EventBridge scheduler target](screenshots/08-eventbridge-scheduler-target.png)
-![EventBridge scheduler review](screenshots/09-eventbridge-scheduler-review.png)
+
+<img width="975" height="382" alt="image" src="https://github.com/user-attachments/assets/6f265c87-6b90-4958-bbe3-6e6d2f76ca73" />
+
+
+<img width="975" height="383" alt="image" src="https://github.com/user-attachments/assets/99dfae50-e9aa-4254-8cb5-cea50bf7b6a5" />
+
+
+<img width="975" height="293" alt="image" src="https://github.com/user-attachments/assets/04ac0dd1-ebc4-490e-b334-d35c89b9b036" />
+
 
 ### 6. Clean Up
 
-8. Change `THRESHOLD_USD` back to a realistic value like 50.00 and Deploy — this is the final submission version.
-9. Double-check the EventBridge rule is only scheduled daily, not more frequently.
+- Change `THRESHOLD_USD` back to a realistic value like 50.00 and Deploy — this is the final submission version.
+- Double-check the EventBridge rule is only scheduled daily, not more frequently.
 
 ### 7. Discussion Point
 
