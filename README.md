@@ -1,10 +1,10 @@
 # AWS Lambda Automation using Boto3
 
-Name :B Rahul Chidambaram
+**Name:** B Rahul Chidambaram
 
-Batch : 17A
+**Batch:** 17A
 
-This repository contains Four AWS Lambda automation assignments developed using Python 3.14 and Boto3.
+A collection of hands-on AWS automation projects built using AWS Lambda, Python (Boto3), IAM, Amazon EventBridge, Amazon SNS, Amazon S3, Amazon EC2, and Amazon EBS. These projects demonstrate how to automate common cloud operations, improve operational efficiency, and implement infrastructure best practices using serverless architectures. The repository is based on four practical automation assignments covering storage management, backup automation, resource tagging, and AWS cost monitoring.
 
 ## Assignments
 
@@ -20,3 +20,6 @@ Each assignment contains:
 - Documentation
 - Screenshots
 - README.md
+
+---
+These projects demonstrate practical usage of AWS services commonly used in production environments and provide a strong foundation for learning serverless automation.
