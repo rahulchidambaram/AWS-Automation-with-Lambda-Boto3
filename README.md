@@ -21,6 +21,7 @@ Each assignment contains:
 ---
 These projects demonstrate practical usage of AWS services commonly used in production environments and provide a strong foundation for learning serverless automation.
 
+---
 
 ## 📂 Repository Structure
 
