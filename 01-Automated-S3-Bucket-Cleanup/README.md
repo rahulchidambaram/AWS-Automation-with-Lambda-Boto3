@@ -4,6 +4,21 @@
 
 Automate deletion of stale objects in an S3 bucket: delete files older than 30 days in a specific bucket, using a Lambda function (Python 3.14 + Boto3) with a least-privilege IAM role.
 
+## Best Practices
+Create a monthly AWS Budget with a $1 limit to receive email notifications and avoid unexpected AWS charges.
+
+### Steps:
+1. Sign in to the AWS Management Console. 
+2. Search for Billing and Cost Management. 
+3. Select Budgets from the left navigation pane.
+4. Choose Cost Budget.
+5. Give a Budget name, Budget period, Recurring Budget: Yes, Budget amount: $1. Leave the remaining options as default.
+6. Create an Alert, add notification, Enter your email address.
+7. Create the budget.
+
+<img width="975" height="195" alt="image" src="https://github.com/user-attachments/assets/e6918076-d24c-4009-bb1d-6b127aa65a61" />
+
+
 ## Solution — Step by Step
 
 ### 1. Setup
@@ -12,7 +27,8 @@ Automate deletion of stale objects in an S3 bucket: delete files older than 30 d
 2. Leave all defaults (Block Public Access ON), click **Create bucket**.
 3. Upload 3-4 small test files (any `.txt` files work) into the bucket.
 
-![S3 bucket with test files uploaded](screenshots/02-s3-bucket-test-files.png)
+<img width="975" height="270" alt="image" src="https://github.com/user-attachments/assets/7ccfda20-50da-44d6-a133-814097da4dcc" />
+
 
 ### 2. Create the IAM Role
 
@@ -45,10 +61,13 @@ Automate deletion of stale objects in an S3 bucket: delete files older than 30 d
   ]
 }
 ```
+ 
+<img width="975" height="391" alt="image" src="https://github.com/user-attachments/assets/e37da2f2-6246-4ed1-a384-f45ff787ae01" />
 
-![IAM inline policy JSON step 1](screenshots/03-iam-role-inline-policy-json-1.png)
-![IAM inline policy JSON step 2](screenshots/04-iam-role-inline-policy-json-2.png)
-![IAM inline policy JSON step 3](screenshots/05-iam-role-inline-policy-json-3.png)
+<img width="975" height="266" alt="image" src="https://github.com/user-attachments/assets/60216776-28ee-4cce-b6ee-75a227ef7690" />
+
+<img width="975" height="239" alt="image" src="https://github.com/user-attachments/assets/fe60ae3f-0360-422c-97fb-740b4650bd34" />
+ 
 
 ### 3. Create the Lambda Function
 
@@ -63,15 +82,12 @@ Automate deletion of stale objects in an S3 bucket: delete files older than 30 d
 
 ```python
 """
-Assignment 1: Automated S3 Bucket Cleanup (Objects Older Than 30 Days)
-
 Deletes objects in a given S3 bucket whose LastModified timestamp is older
 than a configurable age threshold.
 
 FOR TESTING: set AGE_THRESHOLD_MINUTES (e.g. 5) via the Lambda env var
 or the fallback below, so you don't have to wait 30 real days to see it work.
 
-FOR FINAL SUBMISSION: switch back to the 30-day threshold.
 """
 import boto3
 from datetime import datetime, timezone, timedelta
@@ -83,8 +99,8 @@ BUCKET_NAME = "rahul-s3-automated-cleanup"
 # --- Age threshold ---
 # For testing, use minutes so you can see results immediately.
 # For final submission, switch to days=30 and remove the minutes line.
-AGE_THRESHOLD = timedelta(minutes=5)  # <-- TESTING value
-# AGE_THRESHOLD = timedelta(days=30)  # <-- FINAL SUBMISSION value
+# AGE_THRESHOLD = timedelta(minutes=5)  # <-- TESTING value
+AGE_THRESHOLD = timedelta(days=30)  # <-- FINAL SUBMISSION value
 
 
 def lambda_handler(event, context):
@@ -120,9 +136,8 @@ def lambda_handler(event, context):
     }
 ```
 
-![Lambda function code pasted, step 1](screenshots/06-lambda-function-code-1.png)
-![Lambda function code pasted, step 2](screenshots/07-lambda-function-code-2.png)
-![Lambda function code pasted, step 3](screenshots/08-lambda-function-code-3.png)
+<img width="809" height="621" alt="image" src="https://github.com/user-attachments/assets/548cf3be-dccd-4fa8-8b81-4e171a6af0f3" />
+
 
 ### 4. Test It
 
@@ -132,17 +147,18 @@ def lambda_handler(event, context):
 20. Go back to S3 and refresh the bucket to confirm the expected files remain.
 21. To actually see a deletion happen: temporarily set `AGE_THRESHOLD = timedelta(seconds=10)`, wait 15 seconds, and re-test.
 
-![Test event setup](screenshots/09-test-event-setup.png)
+<img width="975" height="399" alt="image" src="https://github.com/user-attachments/assets/b9258c92-1b60-466c-9ad4-fc0e68f02176" />
+
 
 **Before Deletion**
 
-![CloudWatch logs before deletion](screenshots/10-before-deletion-cloudwatch-logs.png)
-![S3 bucket before deletion](screenshots/11-before-deletion-s3-bucket.png)
+<img width="785" height="632" alt="image" src="https://github.com/user-attachments/assets/caefbaf2-b177-4e77-99c8-08ca0d39d76d" />
+
 
 **After Clean-up**
 
-![CloudWatch logs after cleanup](screenshots/12-after-cleanup-cloudwatch-logs.png)
-![S3 bucket after cleanup](screenshots/13-after-cleanup-s3-bucket.png)
+<img width="791" height="613" alt="image" src="https://github.com/user-attachments/assets/01220f22-ed3e-497c-a636-a5c908396933" />
+
 
 ### 5. Clean Up
 
