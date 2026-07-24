@@ -8,20 +8,20 @@ Automate EBS volume backups: create a snapshot of a specified volume, tag it, an
 
 ### 1. Setup
 
-1. Login to the AWS Management Console → Search for EC2 → Click **Launch Instance** → Enter a Name **"EBS-Backup-Server"** → Choose **Amazon Linux AMI** → Instance Type: **t2.micro** → Create or select an existing key pair.
-2. Find the reference Network settings below. (Allow SSH)
+- Login to the AWS Management Console → Search for EC2 → Click **Launch Instance** → Enter a Name **"EBS-Backup-Server"** → Choose **Amazon Linux AMI** → Instance Type: **t2.micro** → Create or select an existing key pair.
+- Find the reference Network settings below. (Allow SSH)
 
 <img width="975" height="521" alt="image" src="https://github.com/user-attachments/assets/e4811b5b-308b-40d2-a4f1-b97e8f72184a" />
 
 
-3. Under Configure Storage:
+- Under Configure Storage:
    - Volume Type: gp3 | Size: 8 GiB
-4. Click Launch Instance.
+- Click Launch Instance.
 
 <img width="975" height="394" alt="image" src="https://github.com/user-attachments/assets/5cb62dc5-634a-47f3-9484-7d1160feb0fc" />
 
 
-5. EC2 → Volumes (left sidebar) → find the volume attached to your instance → copy its Volume ID (`vol-0b3c79c9f6f3491f7`).
+- EC2 → Volumes (left sidebar) → find the volume attached to your instance → copy its Volume ID (`vol-0b3c79c9f6f3491f7`).
 
 
 <img width="975" height="384" alt="image" src="https://github.com/user-attachments/assets/82181a84-4228-431e-9237-134bf0b23b7e" />
@@ -30,9 +30,9 @@ Automate EBS volume backups: create a snapshot of a specified volume, tag it, an
 
 ### 2. Create the IAM Role for Lambda EBS Snapshot
 
-6. Console → IAM → Roles → Create role.
-7. Trusted entity: AWS service → Use case: Lambda.
-8. Next → Create Inline Policy → JSON → paste the policy below as-is → name it **EBSSnapshotPolicy** → Role name: **ebs-snapshot-lambda-role** → Create Role
+- Console → IAM → Roles → Create role.
+- Trusted entity: AWS service → Use case: Lambda.
+- Next → Create Inline Policy → JSON → paste the policy below as-is → name it **EBSSnapshotPolicy** → Role name: **ebs-snapshot-lambda-role** → Create Role
 
 **Inline policy JSON used:**
 
@@ -70,8 +70,8 @@ Automate EBS volume backups: create a snapshot of a specified volume, tag it, an
 
 ### 3. Create the IAM Role for Event Bridge Scheduler
 
-9. Go to Roles → Create role → Choose Custom trust policy.
-10. Replace the default policy with the following:
+- Go to Roles → Create role → Choose Custom trust policy.
+- Replace the default policy with the following:
 
 ```json
 {
@@ -88,7 +88,7 @@ Automate EBS volume backups: create a snapshot of a specified volume, tag it, an
 }
 ```
 
-3. Next → Create Inline Policy → JSON → paste the policy below as-is → Create Role
+- Next → Create Inline Policy → JSON → paste the policy below as-is → Create Role
 
 **Inline policy JSON used:**
 
@@ -111,10 +111,10 @@ Automate EBS volume backups: create a snapshot of a specified volume, tag it, an
 
 ### 4. Create the Lambda Function
 
-11. Lambda → Create function → Author from scratch → Function name: **ebs-snapshot-backup-cleanup**, Python 3.14, Configure custom execution role (choose existing role) → **ebs-snapshot-lambda-role** → Create function
-12. Paste the code below (Code Source).
-13. Confirm `RETENTION = timedelta(minutes=1)` is active for testing, Deploy.
-14. Configuration → General → Timeout: 30 seconds, Save.
+- Lambda → Create function → Author from scratch → Function name: **ebs-snapshot-backup-cleanup**, Python 3.14, Configure custom execution role (choose existing role) → **ebs-snapshot-lambda-role** → Create function
+- Paste the code below (Code Source).
+- Confirm `RETENTION = timedelta(minutes=1)` is active for testing, Deploy.
+- Configuration → General → Timeout: 30 seconds, Save.
 
 **Full function code (`lambda_function.py`):**
 
@@ -203,20 +203,20 @@ def lambda_handler(event, context):
 
 ### 5. Test It
 
-15. Lambda → Test → Event name: **ManualSnapshotTest** → invoke with empty `{}` test event. Save and Test
+- Lambda → Test → Event name: **ManualSnapshotTest** → invoke with empty `{}` test event. Save and Test
 
 <img width="975" height="338" alt="image" src="https://github.com/user-attachments/assets/b9d7f9b5-e829-46a4-9702-452ba3a185e7" />
 
 <img width="975" height="386" alt="image" src="https://github.com/user-attachments/assets/6db9f2f0-cc9e-42f2-9505-da0d101e12bb" />
 
 
-16. EC2 → Snapshots (left sidebar) → refresh, confirm the new snapshot appears tagged **CreatedBy=Lambda-Backup**.
-17. Wait 5+ minutes, invoke Test again — this second run should delete the first snapshot (now older than the 5-minute testing retention) while keeping the newest one.
+- EC2 → Snapshots (left sidebar) → refresh, confirm the new snapshot appears tagged **CreatedBy=Lambda-Backup**.
+- Wait 5+ minutes, invoke Test again — this second run should delete the first snapshot (now older than the 5-minute testing retention) while keeping the newest one.
 
 <img width="975" height="363" alt="image" src="https://github.com/user-attachments/assets/a1d8f301-29da-4ee7-9584-a3acaec9f286" />
 
 
-18. Check CloudWatch Logs for the created/deleted snapshot ID lines.
+- Check CloudWatch Logs for the created/deleted snapshot ID lines.
 
 <img width="975" height="377" alt="image" src="https://github.com/user-attachments/assets/92622129-0787-4438-88e4-e7194aad1859" />
 
@@ -227,24 +227,24 @@ def lambda_handler(event, context):
 
 EventBridge Scheduler is the recommended AWS service for recurring scheduled tasks and replaces the need for creating a scheduled EventBridge Rule.
 
-19. Go to Amazon EventBridge → Under Scheduler (Schedule) → Create Schedule
-20. Enter Schedule Name (**Weekly-EBS-Backup**) & Description → Recurring Schedule → Cron-based Schedule → `cron(0 10 ? * SUN *)` → Flexible Time Window (Off)
+- Go to Amazon EventBridge → Under Scheduler (Schedule) → Create Schedule
+- Enter Schedule Name (**Weekly-EBS-Backup**) & Description → Recurring Schedule → Cron-based Schedule → `cron(0 10 ? * SUN *)` → Flexible Time Window (Off)
 
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/41280c9b-7d7b-4521-a17e-aa3caf8169dc" />
 
 
-21. Select Target → AWS Lambda → Select the previously created Lambda function → Use the existing role → **EventBridgeSchedulerLambdaRole**
-22. 22. Review and Create Schedule
+- Select Target → AWS Lambda → Select the previously created Lambda function → Use the existing role → **EventBridgeSchedulerLambdaRole**
+- Review and Create Schedule
 
 <img width="975" height="382" alt="image" src="https://github.com/user-attachments/assets/09a7e53d-1ae8-4f6e-9261-52726070d40c" />
 
 
 ### 7. Clean Up
 
-23. Change `RETENTION` back to `timedelta(days=30)` and Deploy — this is the final submission version.
-24. Delete any leftover test snapshots manually from EC2
-25. Snapshots (Actions → Delete snapshot).
-26. Terminate the throwaway EC2 instance used for the volume.
+- Change `RETENTION` back to `timedelta(days=30)` and Deploy — this is the final submission version.
+- Delete any leftover test snapshots manually from EC2
+- Snapshots (Actions → Delete snapshot).
+- Terminate the throwaway EC2 instance used for the volume.
 
 ### 8. Discussion Point
 
