@@ -17,12 +17,13 @@ Automatically tag newly launched EC2 instances for resource tracking, ownership,
 
 Note: This instance will be used later to verify automatic tagging.
 
-![EC2 instance launch](screenshots/01-ec2-instance-launch.png)
+<img width="975" height="382" alt="image" src="https://github.com/user-attachments/assets/7691f4f5-51b9-45d6-93d1-010876132753" />
+
 
 ### 2. Create the IAM Role
 
-1. IAM → Roles → Create role → AWS service → Lambda → name **EC2-autotag-lambda-role**
-2. Add inline policy → JSON → paste the policy below as-is → name it **EC2AutoTagPolicy**.
+- IAM → Roles → Create role → AWS service → Lambda → name **EC2-autotag-lambda-role**
+- Add inline policy → JSON → paste the policy below as-is → name it **EC2AutoTagPolicy**.
 
 **Inline policy JSON used:**
 
@@ -61,13 +62,14 @@ Note: This instance will be used later to verify automatic tagging.
 }
 ```
 
-![IAM role inline policy](screenshots/02-iam-role-inline-policy.png)
+<img width="975" height="373" alt="image" src="https://github.com/user-attachments/assets/e56b5f1e-9121-450b-a0ce-944dd143cf67" />
+
 
 ### 3. Create the Lambda Function
 
-3. Lambda → Create function → **ec2-autotag-on-launch**, Python 3.14, existing role → **ec2-autotag-lambda-role**.
-4. Paste the code below, Deploy.
-5. Configuration → General configuration → Edit → Timeout: 15 seconds, Save.
+- Lambda → Create function → **ec2-autotag-on-launch**, Python 3.14, existing role → **ec2-autotag-lambda-role**.
+- Paste the code below, Deploy.
+- Configuration → General configuration → Edit → Timeout: 15 seconds, Save.
 
 **Full function code (`lambda_function.py`):**
 
@@ -157,12 +159,13 @@ def lambda_handler(event, context):
     }
 ```
 
-![Lambda function code pasted](screenshots/03-lambda-function-code.png)
+<img width="975" height="250" alt="image" src="https://github.com/user-attachments/assets/4490fa8d-5952-4c6d-afba-8f76be871646" />
+
 
 ### 4. Test It
 
-6. Create a new Test Event. Give a name
-7. Paste the below JSON in Event JSON. (Replace the instance-id from the created EC2)
+- Create a new Test Event. Give a name
+- Paste the below JSON in Event JSON. (Replace the instance-id from the created EC2)
 
 ```json
 {
@@ -174,14 +177,16 @@ def lambda_handler(event, context):
 
 8. Check CloudWatch Logs for the 'Tagged instance...' line (Logs → Log Management)
 
-![Test — CloudWatch logs, step 1](screenshots/04-test-cloudwatch-logs-1.png)
-![Test — CloudWatch logs, step 2](screenshots/05-test-cloudwatch-logs-2.png)
+<img width="975" height="385" alt="image" src="https://github.com/user-attachments/assets/9d942959-e3fb-4fc5-a399-b421f4af9dac" />
+
+<img width="975" height="315" alt="image" src="https://github.com/user-attachments/assets/08e5334e-5a11-4d1a-a818-c8deecd53052" />
+
 
 ### 5. Configure EventBridge
 
-1. Amazon EventBridge → Rules → Create rule
-2. Go to Configure tab → Enter name: **AutoTagEC2Rule** & Description: **Automatically tags EC2 instances when they enter the running state** → Event bus: default → Rule type: Rule with an event pattern.
-3. Go to Build tab → In Events: AWS Service Events → Drag **EC2 Instance State Change Notification** to triggering event → Make sure the Event Pattern looks like the below JSON:
+- Amazon EventBridge → Rules → Create rule
+- Go to Configure tab → Enter name: **AutoTagEC2Rule** & Description: **Automatically tags EC2 instances when they enter the running state** → Event bus: default → Rule type: Rule with an event pattern.
+- Go to Build tab → In Events: AWS Service Events → Drag **EC2 Instance State Change Notification** to triggering event → Make sure the Event Pattern looks like the below JSON:
 
 ```json
 {
@@ -193,22 +198,27 @@ def lambda_handler(event, context):
 }
 ```
 
-4. Drag **Lambda function** to Targets → Click on No resource selected in Lambda → Target in this account → Choose existing role: **EC2-autotag-lambda-role** → Leave all other settings as default.
-5. Create rule.
+- Drag **Lambda function** to Targets → Click on No resource selected in Lambda → Target in this account → Choose existing role: **EC2-autotag-lambda-role** → Leave all other settings as default.
+- Create rule.
 
-![EventBridge rule configure](screenshots/06-eventbridge-rule-configure.png)
-![EventBridge rule pattern](screenshots/07-eventbridge-rule-pattern.png)
-![EventBridge rule target](screenshots/08-eventbridge-rule-target.png)
+<img width="975" height="302" alt="image" src="https://github.com/user-attachments/assets/15d07113-170f-43e2-a823-c4457d349422" />
+
+<img width="975" height="375" alt="image" src="https://github.com/user-attachments/assets/e243d17e-8b91-4314-9f7c-eb27128d4788" />
+
+<img width="975" height="428" alt="image" src="https://github.com/user-attachments/assets/8d79d53a-5efa-4cd6-8511-1eaaebf64076" />
+
 
 **Final Output**
 
-![Final output — instance tags, view 1](screenshots/09-final-output-tags-1.png)
-![Final output — instance tags, view 2](screenshots/10-final-output-tags-2.png)
+<img width="975" height="412" alt="image" src="https://github.com/user-attachments/assets/7bc50901-6e34-4db7-be7f-d98d3b9b4e3d" />
+
+<img width="975" height="413" alt="image" src="https://github.com/user-attachments/assets/a379a441-0864-4459-8911-064428546711" />
+
 
 ### 6. Clean Up
 
-6. Terminate the created instances, Amazon EventBridge, Lambda & IAM Roles
-7. Confirm it's terminated before logging out.
+- Terminate the created instances, Amazon EventBridge, Lambda & IAM Roles
+- Confirm it's terminated before logging out.
 
 ### 7. Discussion Point
 
