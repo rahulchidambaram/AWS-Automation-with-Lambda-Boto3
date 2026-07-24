@@ -23,22 +23,22 @@ Create a monthly AWS Budget with a $1 limit to receive email notifications and a
 
 ### 1. Setup
 
-1. Console → S3 → Create bucket. Name it something unique (e.g. `rc-lambda-cleanup-test-<random numbers>`), region `us-east-1`.
-2. Leave all defaults (Block Public Access ON), click **Create bucket**.
-3. Upload 3-4 small test files (any `.txt` files work) into the bucket.
+- Console → S3 → Create bucket. Name it something unique (e.g. `rc-lambda-cleanup-test-<random numbers>`), region `us-east-1`.
+- Leave all defaults (Block Public Access ON), click **Create bucket**.
+- Upload 3-4 small test files (any `.txt` files work) into the bucket.
 
 <img width="975" height="270" alt="image" src="https://github.com/user-attachments/assets/7ccfda20-50da-44d6-a133-814097da4dcc" />
 
 
 ### 2. Create the IAM Role
 
-4. Console → IAM → Roles → Create role.
-5. Trusted entity: AWS service → Use case: Lambda.
-6. Skip attaching a managed policy for now, name it **s3-cleanup-lambda-role**, Create role.
-7. Open the role → Add permissions → Create inline policy → JSON tab.
-8. Click Add permissions → Attach policies → Add → **AWSLambdaBasicExecutionRole**
-9. Paste the policy below, replacing `your-bucket-name-here` in both ARNs with your actual bucket name.
-10. Name the policy **S3CleanupInlinePolicy**, Create policy.
+- Console → IAM → Roles → Create role.
+- Trusted entity: AWS service → Use case: Lambda.
+- Skip attaching a managed policy for now, name it **s3-cleanup-lambda-role**, Create role.
+- Open the role → Add permissions → Create inline policy → JSON tab.
+- Click Add permissions → Attach policies → Add → **AWSLambdaBasicExecutionRole**
+- Paste the policy below, replacing `your-bucket-name-here` in both ARNs with your actual bucket name.
+- Name the policy **S3CleanupInlinePolicy**, Create policy.
 
 **Inline policy JSON used:**
 
@@ -71,12 +71,12 @@ Create a monthly AWS Budget with a $1 limit to receive email notifications and a
 
 ### 3. Create the Lambda Function
 
-11. Console → Lambda → Create function → Author from scratch.
-12. Name: **s3-stale-object-cleanup**, Runtime: Python 3.14.
-13. Under 'General' → 'Custom execution role' → Choose an existing role → select **s3-cleanup-lambda-role**.
-14. Create function.
-15. In the code editor, delete the placeholder code and paste the code below.
-16. Confirm `AGE_THRESHOLD = timedelta(minutes=5)` is active (testing mode), then Deploy.
+- Console → Lambda → Create function → Author from scratch.
+- Name: **s3-stale-object-cleanup**, Runtime: Python 3.14.
+- Under 'General' → 'Custom execution role' → Choose an existing role → select **s3-cleanup-lambda-role**.
+- Create function.
+- In the code editor, delete the placeholder code and paste the code below.
+- Confirm `AGE_THRESHOLD = timedelta(minutes=5)` is active (testing mode), then Deploy.
 
 **Full function code (`lambda_function.py`):**
 
@@ -141,11 +141,11 @@ def lambda_handler(event, context):
 
 ### 4. Test It
 
-17. Click Test → Create new test event → name it **manual-auto-cleanup-test** → keep the default empty JSON `{}` → Save.
-18. Click Test again to invoke the function.
-19. In Lambda → Go to the Monitor tab → View CloudWatch logs → open the latest log stream to see the `Kept:`/`Deleted:` lines.
-20. Go back to S3 and refresh the bucket to confirm the expected files remain.
-21. To actually see a deletion happen: temporarily set `AGE_THRESHOLD = timedelta(seconds=10)`, wait 15 seconds, and re-test.
+- Click Test → Create new test event → name it **manual-auto-cleanup-test** → keep the default empty JSON `{}` → Save.
+- Click Test again to invoke the function.
+- In Lambda → Go to the Monitor tab → View CloudWatch logs → open the latest log stream to see the `Kept:`/`Deleted:` lines.
+- Go back to S3 and refresh the bucket to confirm the expected files remain.
+- To actually see a deletion happen: temporarily set `AGE_THRESHOLD = timedelta(seconds=10)`, wait 15 seconds, and re-test.
 
 <img width="975" height="399" alt="image" src="https://github.com/user-attachments/assets/b9258c92-1b60-466c-9ad4-fc0e68f02176" />
 
@@ -162,8 +162,8 @@ def lambda_handler(event, context):
 
 ### 5. Clean Up
 
-22. Change `AGE_THRESHOLD` back to `timedelta(days=30)` and Deploy again.
-23. Delete the test bucket (or its contents) once you're done capturing screenshots, to avoid any storage charges.
+- Change `AGE_THRESHOLD` back to `timedelta(days=30)` and Deploy again.
+- Delete the test bucket (or its contents) once you're done capturing screenshots, to avoid any storage charges.
 
 ### 6. Discussion Point
 
